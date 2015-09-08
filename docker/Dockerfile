@@ -17,5 +17,5 @@ ENV GIMME_ARCH=amd64
 
 RUN useradd -m travis
 USER travis
-RUN mkdir /home/travis/.gimme/
-VOLUME /home/travis/.gimme/
+RUN mkdir /home/travis/.testing/
+ADD ./test.sh /home/travis/.testing/test.sh

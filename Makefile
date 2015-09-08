@@ -1,16 +1,9 @@
-VERSIONS = 1.0.1 1.0.2 1.0.3 1.0.3 1.1.1 1.1.2 1.1 1.2.2 1.3 1.3.1 1.3.2 1.3.3 1.4 1.4.1 1.4.2 1.5
+VERSIONS = 1.4 1.5 tip
 
 test ::
 		@echo Start testing ...
 		for version in $(VERSIONS);do \
-			docker run --name zypper-docker-testing zypper-docker
-			echo Switch to Go $$version; \
-			docker run --volumes-from zypper-docker-testing -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker gimme $$version; \
-			docker run --volumes-from zypper-docker-testing -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker /bin/bash/ -c "source ~/.gimme/envs/go$${version}.env"; \
-			@echo Running unit test inside of Go $$version; \
-			docker run --volumes-from zypper-docker-testing -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker godep go test -race -v ./...; \
-			@echo Running climate inside of Go $$version; \
-			docker run --volumes-from zypper-docker-testing -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker climate -open=false -threshold=80.0 -errcheck -vet -fmt .; \
+			docker run -rm -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker /bin/bash -c "~/.testing/test.sh $${version}"; \
 		done
 
 
