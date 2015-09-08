@@ -1,38 +1,26 @@
-test_14 ::
-	@echo Running unit tests inside of Go 1.4
-	docker run --rm -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker-testing-1.4 godep go test -race -v ./...
-	@echo Running climate inside of Go 1.4
-	docker run --rm -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker-testing-1.4 climate -open=false -threshold=80.0 -errcheck -vet -fmt .
+test ::
+		@echo Start testing ...
+		VERSIONS = 1.0.1 1.0.2 1.0.3 1.0.3 1.1.1 1.1.2 1.1 1.2.2 1.3 1.3.1 1.3.2 1.3.3 1.4 1.4.1 1.4.2 1.5
+		for version in $(VERSIONS);do \
+			echo Switch to Go $$version; \
+			docker run --rm -v zypper-docker-testing gimme $$version; \
+			docker run --rm -v zypper-docker-testing source ~/.gimme/envs/go$${version}.env; \
+			@echo Running unit test inside of Go $$version; \
+			docker run --rm -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker-testing godep go test -race -v ./...; \
+			@echo Running climate inside of Go $$version; \
+			docker run --rm -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker-testing climate -open=false -threshold=80.0 -errcheck -vet -fmt .; \
+		done
 
-test_15 ::
-	@echo Running unit tests inside of Go 1.5
-	docker run --rm -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker-testing-1.5 godep go test -race -v ./...
-	@echo Running climate inside of Go 1.5
-	docker run --rm -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker-testing-1.5 climate -open=false -threshold=80.0 -errcheck -vet -fmt .
-
-test_tip ::
-	@echo Running unit tests inside of tip
-	docker run --rm -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker-testing-tip godep go test -race -v ./...
-	@echo Running climate inside of tip
-	docker run --rm -v `pwd`:/go/src/github.com/SUSE/zypper-docker zypper-docker-testing-tip climate -open=false -threshold=80.0 -errcheck -vet -fmt .
-
-test :: test_14 test_15 test_tip
 
 clean ::
-	docker rmi zypper-docker-testing-1.4
-	docker rmi zypper-docker-testing-1.5
-	docker rmi zypper-docker-testing-tip
+		docker images | grep -q zypper-docker-testing && docker rmi zypper-docker-testing || echo "No testing image found"
 
-build_14 ::
-	@echo Building zypper-docker-testing-1.4
-	docker build -f docker/Dockerfile-1.4 -t zypper-docker-testing-1.4 docker
-
-build_15 ::
-	@echo Building zypper-docker-testing-1.5
-	docker build -f docker/Dockerfile-1.5 -t zypper-docker-testing-1.5 docker
-
-build_tip ::
-	@echo Building zypper-docker-testing-tip
-	docker build -f docker/Dockerfile-tip -t zypper-docker-testing-tip docker
-
-build :: build_14 build_15 build_tip
+build ::
+		@echo Building zypper-docker-testing
+		docker build -f docker/Dockerfile -t zypper-docker-testing docker
+help ::
+		@echo usage: make [target]
+		@echo
+		@echo build: Creates the dockerimage.
+		@echo clean: Remove the dockerimage.
+		@echo test: Testing zypper-docker.
