@@ -23,6 +23,9 @@ else
         esac
    done
 fi
+if [ $version == "tip" ]; then
+    gimme 1.4
+fi
 gimme $version
 source ~/.gimme/envs/go${version}.env
 godep go test -race ./...
