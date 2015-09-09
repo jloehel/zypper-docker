@@ -14,6 +14,14 @@ test_integration :: build_zypper_docker build_integration_tests
 						zypper-docker-integration-tests \
 						rake test
 
+test_integration :: build_zypper_docker build_integration_tests
+	docker run \
+		--rm \
+		--volume="/var/run/docker.sock:/var/run/docker.sock" \
+		--volume="$(CURDIR):/code" \
+		zypper-docker-integration-tests \
+		rake test
+
 clean ::
 		docker rmi zypper-docker
 		docker rmi zypper-docker-integration-tests
